@@ -2,7 +2,10 @@ import argparse
 import os
 import torch
 
+from data.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_ISEM
 from exp.exp_informer import Exp_Informer
+from models.MMCI_misson2 import InformerStack
+from models.model import Informer, InformerStack
 
 parser = argparse.ArgumentParser(description='[Informer] Long Sequences Forecasting')
 
@@ -78,16 +81,44 @@ data_parser = {
     'WTH':{'data':'WTH.csv','T':'WetBulbCelsius','M':[12,12,12],'S':[1,1,1],'MS':[12,12,1]},
     'ECL':{'data':'ECL.csv','T':'MT_320','M':[321,321,321],'S':[1,1,1],'MS':[321,321,1]},
     'Solar':{'data':'solar_AL.csv','T':'POWER_136','M':[137,137,137],'S':[1,1,1],'MS':[137,137,1]},
-    'ISEM': {'data': 'ISEM_1_add_d.csv', 'T': 'DAM_Price', 'M': [11, 11, 11], 'S': [1, 1, 1],
-               'MS': [11, 11, 1]},
-    'ISEM1': {'data': 'ISEM_1_add_d.csv', 'T': ['DAM_Price', 'd'], 'M': [11, 11, 2], 'S': [1, 1, 1],
-               'MS': [11, 11, 1]},
+    'ISEM': {'data': 'ISEM_1.csv', 'T': 'DAM_Price', 'M': [10, 10, 10]},
+    'ISEM_M_11_11_11': {'data': 'ISEM_1_add_d.csv', 'T': 'DAM_Price', 'M': [11, 11, 11],
+                        'informer': Informer,'informerstack': InformerStack,'data_dict': {'ISEM_M_11_11_11': Dataset_Custom,}},
+    'ISEM1': {'data': 'ISEM_1_add_d.csv', 'T': ['DAM_Price', 'd'], 'M': [11, 11, 2]},
 }
+data_dict = {
+    'ETTh1': Dataset_ETT_hour,
+    'ETTh2': Dataset_ETT_hour,
+    'ETTm1': Dataset_ETT_minute,
+    'ETTm2': Dataset_ETT_minute,
+    'WTH': Dataset_Custom,
+    'ECL': Dataset_Custom,
+    'Solar': Dataset_Custom,
+    'custom': Dataset_Custom,
+    'ISEM': Dataset_Custom,
+    'ISEM1': Dataset_ISEM,
+}
+# model_dict = {
+#     'informer': Informer,
+#     'informerstack': InformerStack,
+# }
+
+for key in data_parser:
+    if not ('informer' in data_parser[key]):
+        data_parser[key]['informer'] = Informer
+    if not ('informerstack' in data_parser[key]):
+        data_parser[key]['informerstack'] = InformerStack
+    if not ('data_dict' in data_parser[key]):
+        data_parser[key]['data_dict'] = data_dict
+
 if args.data in data_parser.keys():
     data_info = data_parser[args.data]
     args.data_path = data_info['data']
     args.target = data_info['T']
     args.enc_in, args.dec_in, args.c_out = data_info[args.features]
+    args.informer = data_info['informer']
+    args.informerstack = data_info['informerstack']
+    args.data_dict = data_info['data_dict']
 
 args.s_layers = [int(s_l) for s_l in args.s_layers.replace(' ','').split(',')]
 args.detail_freq = args.freq

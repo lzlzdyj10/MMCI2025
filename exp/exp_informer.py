@@ -23,9 +23,12 @@ class Exp_Informer(Exp_Basic):
         super(Exp_Informer, self).__init__(args)
     
     def _build_model(self):
+
         model_dict = {
-            'informer':Informer,
-            'informerstack':InformerStack,
+            # 'informer':Informer,
+            # 'informerstack':InformerStack,
+            'informer' : self.args.informer,
+            'informerstack' : self.args.informerstack
         }
         if self.args.model=='informer' or self.args.model=='informerstack':
             e_layers = self.args.e_layers if self.args.model=='informer' else self.args.s_layers
@@ -59,20 +62,20 @@ class Exp_Informer(Exp_Basic):
 
     def _get_data(self, flag):
         args = self.args
-
-        data_dict = {
-            'ETTh1':Dataset_ETT_hour,
-            'ETTh2':Dataset_ETT_hour,
-            'ETTm1':Dataset_ETT_minute,
-            'ETTm2':Dataset_ETT_minute,
-            'WTH':Dataset_Custom,
-            'ECL':Dataset_Custom,
-            'Solar':Dataset_Custom,
-            'custom':Dataset_Custom,
-            'ISEM': Dataset_Custom,
-            'ISEM1': Dataset_ISEM,
-        }
-        Data = data_dict[self.args.data]
+        #
+        # data_dict = {
+        #     'ETTh1':Dataset_ETT_hour,
+        #     'ETTh2':Dataset_ETT_hour,
+        #     'ETTm1':Dataset_ETT_minute,
+        #     'ETTm2':Dataset_ETT_minute,
+        #     'WTH':Dataset_Custom,
+        #     'ECL':Dataset_Custom,
+        #     'Solar':Dataset_Custom,
+        #     'custom':Dataset_Custom,
+        #     'ISEM': Dataset_Custom,
+        #     'ISEM1': Dataset_ISEM,
+        # }
+        Data = self.args.data_dict[self.args.data]
         timeenc = 0 if args.embed!='timeF' else 1
 
         if flag == 'test':
