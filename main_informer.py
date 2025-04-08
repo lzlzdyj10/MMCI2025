@@ -4,7 +4,8 @@ import torch
 
 from data.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_ISEM
 from exp.exp_informer import Exp_Informer
-from models.MMCI_misson2 import InformerStack
+from exp.exp_informer_m2 import Exp_Informer_M2
+from models.MMCI_misson2 import InformerStack, MMCInformerMission2
 from models.model import Informer, InformerStack
 
 parser = argparse.ArgumentParser(description='[Informer] Long Sequences Forecasting')
@@ -84,6 +85,9 @@ data_parser = {
     'ISEM': {'data': 'ISEM_1.csv', 'T': 'DAM_Price', 'M': [10, 10, 10]},
     'ISEM_M_11_11_11': {'data': 'ISEM_1_add_d.csv', 'T': 'DAM_Price', 'M': [11, 11, 11],
                         'informer': Informer,'informerstack': InformerStack,'data_dict': {'ISEM_M_11_11_11': Dataset_Custom,}},
+
+    'ISEM_M2_11_11_2': {'data': 'ISEM_1_add_d.csv', 'T': ['DAM_Price','d'], 'M': [11, 11, 2],
+                        'informer': MMCInformerMission2,'informerstack': InformerStack,'Exp':Exp_Informer_M2,'data_dict': {'ISEM_M2_11_11_2': Dataset_ISEM,}},
     'ISEM1': {'data': 'ISEM_1_add_d.csv', 'T': ['DAM_Price', 'd'], 'M': [11, 11, 2]},
 }
 data_dict = {
@@ -119,6 +123,11 @@ if args.data in data_parser.keys():
     args.informer = data_info['informer']
     args.informerstack = data_info['informerstack']
     args.data_dict = data_info['data_dict']
+    if not ('Exp' in data_info):
+        Exp = Exp_Informer
+    else:
+        Exp = data_info['Exp']
+
 
 args.s_layers = [int(s_l) for s_l in args.s_layers.replace(' ','').split(',')]
 args.detail_freq = args.freq
@@ -127,7 +136,7 @@ args.freq = args.freq[-1:]
 print('Args in experiment:')
 print(args)
 
-Exp = Exp_Informer
+# Exp = Exp_Informer
 
 for ii in range(args.itr):
     # setting record of experiments
