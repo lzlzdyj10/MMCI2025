@@ -1,10 +1,13 @@
 import argparse
 import os
 import torch
+from joblib.testing import skipif
 
 from data.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_ISEM
 from exp.exp_informer import Exp_Informer
 from exp.exp_informer_m2 import Exp_Informer_M2
+from exp.exp_informer_multi import Exp_Informer_Multi
+from models.MMCI import MMCInformer
 from models.MMCI_misson2 import InformerStack, MMCInformerMission2
 from models.model import Informer, InformerStack
 
@@ -61,6 +64,8 @@ parser.add_argument('--inverse', action='store_true', help='inverse output data'
 
 parser.add_argument('--use_gpu', type=bool, default=True, help='use gpu')
 parser.add_argument('--gpu', type=int, default=0, help='gpu')
+parser.add_argument('--test', type=bool, default=False, help='test')
+parser.add_argument('--train', type=bool, default=True, help='train')
 parser.add_argument('--use_multi_gpu', action='store_true', help='use multiple gpus', default=False)
 parser.add_argument('--devices', type=str, default='0,1,2,3',help='device ids of multile gpus')
 
@@ -88,6 +93,8 @@ data_parser = {
 
     'ISEM_M2_11_11_2': {'data': 'ISEM_1_add_d.csv', 'T': ['DAM_Price','d'], 'M': [11, 11, 2],
                         'informer': MMCInformerMission2,'informerstack': InformerStack,'Exp':Exp_Informer_M2,'data_dict': {'ISEM_M2_11_11_2': Dataset_ISEM,}},
+    'ISEM_MMCI': {'data': 'ISEM_1_add_d.csv', 'T': ['DAM_Price','d'], 'M': [11, 11, 2],
+                        'informer': MMCInformer,'informerstack': InformerStack,'Exp':Exp_Informer_Multi,'data_dict': {'ISEM_MMCI': Dataset_ISEM,}},
     'ISEM1': {'data': 'ISEM_1_add_d.csv', 'T': ['DAM_Price', 'd'], 'M': [11, 11, 2]},
 }
 data_dict = {
@@ -147,10 +154,14 @@ for ii in range(args.itr):
 
     exp = Exp(args) # set experiments
     print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
-    exp.train(setting)
-    
+
+
+    if args.train:
+        exp.train(setting)
+
     print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
-    exp.test(setting)
+    if args.test:
+        exp.test(setting)
 
     if args.do_predict:
         print('>>>>>>>predicting : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
