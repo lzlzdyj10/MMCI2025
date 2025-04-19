@@ -385,7 +385,8 @@ class Dataset_ISEM(Dataset):
             seq_y = self.data_y[r_begin:r_end]
         seq_x_mark = self.data_stamp[s_begin:s_end]
         seq_y_mark = self.data_stamp[r_begin:r_end]
-
+        seq_x[:, -1] = np.random.rand(seq_x.shape[0])
+        seq_y[:, -1] = np.random.rand(seq_y.shape[0])
         return seq_x, seq_y, seq_x_mark, seq_y_mark
 
     def __len__(self):

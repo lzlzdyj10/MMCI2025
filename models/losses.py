@@ -3,7 +3,7 @@ import torch.nn as nn
 import numpy as np
 
 class MMCILoss(nn.Module):
-    def __init__(self,alpha=0.1, beta=1, gamma=0.1):
+    def __init__(self,alpha=1, beta=0.1, gamma=0.1): #之前是（0.1 1 0.1）
         """
         参数说明：
         alpha: 第一项的权重
@@ -56,7 +56,9 @@ class MMCILoss(nn.Module):
         y_1_pred = input[1][:, -l:, 0]
         y = target[:, -l:, 0]
         d_pred = input[0][:, -l:, 1]
-        d = target[:, -l:, 1]
+        #d = target[:, -l:, 1]
+        d = y-y_1_pred
+        #d = y-y_pred #测试哪个效果好用哪个
         loss1 = torch.mean((y_1_pred - y) ** 2)
         loss2_1 = self.alpha * torch.mean((y_pred - y) ** 2)
         loss2_2 = self.beta * torch.mean(torch.abs(y_pred - y) * torch.abs(y_pred - y + d))
